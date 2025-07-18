@@ -1,7 +1,7 @@
 # FantasyPortrait: Enhancing Multi-Character Portrait Animation with Expression-Augmented Diffusion Transformers
 
 [![Home Page](https://img.shields.io/badge/Project-FantasyPortrait-blue.svg)](https://fantasy-amap.github.io/fantasy-portrait/)
-[![arXiv](https://img.shields.io/badge/Arxiv-2504.04842-b31b1b.svg?logo=arXiv)]()
+[![arXiv](https://img.shields.io/badge/Arxiv-2507.12956-b31b1b.svg?logo=arXiv)](https://arxiv.org/abs/2507.12956)
 [![hf_paper](https://img.shields.io/badge/🤗-FantasyPortrait-red.svg)]()
 
 ## Abstract
@@ -15,10 +15,13 @@ The code, models, and dataset will be made publicly available soon.
 ## 🔗Citation
 If you find this repository useful, please consider giving a star ⭐ and citation
 ```
-@article{wang2025fantasytalking,
-   title={FantasyTalking: Realistic Talking Portrait Generation via Coherent Motion Synthesis},
-   author={Wang, Mengchao and Wang, Qiang and Jiang, Fan and Fan, Yaqi and Zhang, Yunpeng and Qi, Yonggang and Zhao, Kun and Xu, Mu},
-   journal={arXiv preprint arXiv:2504.04842},
-   year={2025}
- }
+@misc{wang2025fantasyportraitenhancingmulticharacterportrait,
+      title={FantasyPortrait: Enhancing Multi-Character Portrait Animation with Expression-Augmented Diffusion Transformers}, 
+      author={Qiang Wang and Mengchao Wang and Fan Jiang and Yaqi Fan and Yonggang Qi and Mu Xu},
+      year={2025},
+      eprint={2507.12956},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2507.12956}, 
+}
 ```
