@@ -15,13 +15,10 @@ The code, models, and dataset will be made publicly available soon.
 ## 🔗Citation
 If you find this repository useful, please consider giving a star ⭐ and citation
 ```
-@misc{wang2025fantasyportraitenhancingmulticharacterportrait,
-      title={FantasyPortrait: Enhancing Multi-Character Portrait Animation with Expression-Augmented Diffusion Transformers}, 
-      author={Qiang Wang and Mengchao Wang and Fan Jiang and Yaqi Fan and Yonggang Qi and Mu Xu},
-      year={2025},
-      eprint={2507.12956},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV},
-      url={https://arxiv.org/abs/2507.12956}, 
+@article{wang2025fantasyportrait,
+  title={FantasyPortrait: Enhancing Multi-Character Portrait Animation with Expression-Augmented Diffusion Transformers},
+  author={Wang, Qiang and Wang, Mengchao and Jiang, Fan and Fan, Yaqi and Qi, Yonggang and Xu, Mu},
+  journal={arXiv preprint arXiv:2507.12956},
+  year={2025}
 }
 ```
