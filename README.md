@@ -4,7 +4,10 @@
 [![Home Page](https://img.shields.io/badge/Project-FantasyPortrait-blue.svg)](https://fantasy-amap.github.io/fantasy-portrait/)
 [![arXiv](https://img.shields.io/badge/Arxiv-2507.12956-b31b1b.svg?logo=arXiv)](https://arxiv.org/abs/2507.12956)
 [![hf_dataset](https://img.shields.io/badge/🤗%20Dataset-FantasyPortrait-yellow.svg)](https://huggingface.co/datasets/acvlab/FantasyPortrait)
+[![hf_model](https://img.shields.io/badge/🤗%20Model-FantasyPortrait-green.svg)](https://huggingface.co/acvlab/FantasyPortrait)
 [![hf_paper](https://img.shields.io/badge/🤗-FantasyPortrait-red.svg)](https://huggingface.co/papers/2507.12956)
+[![ms_model](https://img.shields.io/badge/ModelScope-Model-9cf.svg)](https://modelscope.cn/models/amap_cvlab/FantasyPortrait)
+[![ms_dataset](https://img.shields.io/badge/ModelScope-Dataset-ff69b4.svg)](https://www.modelscope.cn/datasets/amap_cvlab/FantasyPortrait-Multi-Expr)
 
 ## 🔥 Latest News!!
 * August 12, 2025: We released the inference code, model weights and datasets.

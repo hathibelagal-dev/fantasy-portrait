@@ -90,7 +90,6 @@ def extract_faces_from_video(video_path, output_dir, face_aligner):
                 right = min(frame_width, x2 + padding)
 
                 face = frame[top:bottom, left:right][:, :, ::-1]
-                print(face.shape)
 
                 if i not in face_videos:
                     face_videos[i] = {"frames": []}
