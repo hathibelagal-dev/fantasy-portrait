@@ -38,7 +38,7 @@ pip install flash_attn
 ```
 
 ### 📦Multi-Expr Dataset
-We make public the first multi-portrait facial expression video dataset **Multi-Expr Dataset**, Please download it via the this [link](https://huggingface.co/datasets/acvlab/FantasyPortrait-Multi-Expr).
+We make public the first multi-portrait facial expression video dataset **Multi-Expr Dataset**, Please download it via the [ModelScope](https://www.modelscope.cn/datasets/amap_cvlab/FantasyPortrait-Multi-Expr) or [Huggingface](https://huggingface.co/datasets/acvlab/FantasyPortrait-Multi-Expr).
 
 ### 🧱Model Download
 | Models        |                       Download Link                                           |    Notes                      |
