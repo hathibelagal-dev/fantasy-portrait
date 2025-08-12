@@ -1,16 +1,94 @@
+[中文阅读](./README_zh.md)
 # FantasyPortrait: Enhancing Multi-Character Portrait Animation with Expression-Augmented Diffusion Transformers
 
 [![Home Page](https://img.shields.io/badge/Project-FantasyPortrait-blue.svg)](https://fantasy-amap.github.io/fantasy-portrait/)
 [![arXiv](https://img.shields.io/badge/Arxiv-2507.12956-b31b1b.svg?logo=arXiv)](https://arxiv.org/abs/2507.12956)
+[![hf_dataset](https://img.shields.io/badge/🤗%20Dataset-FantasyPortrait-yellow.svg)](https://huggingface.co/datasets/acvlab/FantasyPortrait)
 [![hf_paper](https://img.shields.io/badge/🤗-FantasyPortrait-red.svg)](https://huggingface.co/papers/2507.12956)
 
-## Abstract
-Producing expressive facial animations from static images is a challenging task. Prior methods relying on explicit geometric priors (e.g., facial landmarks or 3DMM) often suffer from artifacts in cross reenactment and struggle to capture subtle emotions. Furthermore, existing approaches lack support for multi-character animation, as driving features from different individuals frequently interfere with one another, complicating the task. To address these challenges, we propose FantasyPortrait, a diffusion transformer based framework capable of generating high-fidelity and emotion-rich animations for both single- and multi-character scenarios. Our method introduces an expression-augmented learning strategy that utilizes implicit representations to capture identity-agnostic facial dynamics, enhancing the model's ability to render fine-grained emotions. For multi-character control, we design a masked cross-attention mechanism that ensures independent yet coordinated expression generation, effectively preventing feature interference. To advance research in this area, we propose the Multi-Expr dataset and ExprBench, which are specifically designed datasets and benchmarks for training and evaluating multi-character portrait animations. Extensive experiments demonstrate that FantasyPortrait significantly outperforms state-of-the-art methods in both quantitative metrics and qualitative evaluations, excelling particularly in challenging cross reenactment and multi-character contexts.
-![Overview](https://github.com/Fantasy-AMAP/fantasy-portrait/raw/main/asserts/overview1_2.png)
+## 🔥 Latest News!!
+* August 10, 2025: We released the inference code, model weights and datasets.
+
+## Demo
+For more interesting results, please visit our [website](https://fantasy-amap.github.io/fantasy-portrait/).
+
+| ![单人示例](./assert/demo/danren_1.gif) | ![对比](./assert/demo/duibi.gif) |
+| :---: | :---: |
+| ![动物](./assert/demo/dongwu.gif) | ![双人1](./assert/demo/shuangren_1.gif) |
+| ![双人2](./assert/demo/shuangren_2.gif) | ![三人](./assert/demo/sanren.gif) |
 
 
-## Code, Model and Datasets
-The code, models, and dataset will be made publicly available soon.
+## Quickstart
+### 🛠️Installation
+
+Clone the repo:
+
+```
+git clone https://github.com/Fantasy-AMAP/fantasy-portrait.git
+cd fantasy-portrait
+```
+
+Install dependencies:
+```
+apt-get install ffmpeg
+# Ensure torch >= 2.0.0
+pip install -r requirements.txt
+# Note: flash attention must be installed
+pip install flash_attn
+```
+
+### 📦Multi-Expr Dataset
+We make public the first multi-portrait facial expression video dataset **Multi-Expr Dataset**, Please download it via the this [link](https://huggingface.co/datasets/acvlab/FantasyPortrait-Multi-Expr).
+
+### 🧱Model Download
+| Models        |                       Download Link                                           |    Notes                      |
+| --------------|-------------------------------------------------------------------------------|-------------------------------|
+| Wan2.1-I2V-14B-720P  |      🤗 [Huggingface](https://huggingface.co/Wan-AI/Wan2.1-I2V-14B-720P)    🤖 [ModelScope](https://www.modelscope.cn/models/Wan-AI/Wan2.1-I2V-14B-720P)     | Base model
+| FantasyPortrait      |      🤗 [Huggingface](https://huggingface.co/acvlab/FantasyPortrait/)     🤖 [ModelScope](https://www.modelscope.cn/models/amap_cvlab/FantasyPortrait/)         | Our emo condition weights
+
+Download models using huggingface-cli:
+``` sh
+pip install "huggingface_hub[cli]"
+huggingface-cli download Wan-AI/Wan2.1-I2V-14B-720P --local-dir ./models/Wan2.1-I2V-14B-720P
+huggingface-cli download acvlab/FantasyPortrait --local-dir ./models
+```
+
+Download models using modelscope-cli:
+``` sh
+pip install modelscope
+modelscope download Wan-AI/Wan2.1-I2V-14B-720P --local_dir ./models/Wan2.1-I2V-14B-720P
+modelscope download amap_cvlab/FantasyPortrait  --local_dir ./models
+```
+
+### 🔑 Single-Portrait Inference
+``` sh
+bash infer_single.sh
+```
+
+### 🔑 Multi-Portrait Inference
+If you use input image and drive videos with multiple people, you can run as follows:
+``` sh
+bash infer_multi.sh
+```
+If you use input image with multiple people and different multiple single-human driven videos, you can run as follows:
+```sh
+bash infer_multi_diff.sh
+```
+
+### 📦Speed and VRAM Usage
+We present a detailed table here. The model is tested on a single A100.
+
+|`torch_dtype`|`num_persistent_param_in_dit`|Speed|Required VRAM|
+|-|-|-|-|
+|torch.bfloat16|None (unlimited)|15.5s/it|40G|
+|torch.bfloat16|7*10**9 (7B)|32.8s/it|20G|
+|torch.bfloat16|0|42.6s/it|5G|
+
+
+
+## 🧩 Community Works
+We ❤️ contributions from the open-source community! If your work has improved FantasyPortrait, please inform us.
+Or you can directly e-mail [frank.jf@alibaba-inc.com](mailto://frank.jf@alibaba-inc.com). We are happy to reference your project for everyone's convenience.
 
 ## 🔗Citation
 If you find this repository useful, please consider giving a star ⭐ and citation
@@ -22,3 +100,6 @@ If you find this repository useful, please consider giving a star ⭐ and citati
   year={2025}
 }
 ```
+
+## Acknowledgments
+Thanks to [Wan2.1](https://github.com/Wan-Video/Wan2.1), [PD-FGC](https://github.com/Dorniwang/PD-FGC-inference) and [DiffSynth-Studio](https://github.com/modelscope/DiffSynth-Studio) for open-sourcing their models and code, which provided valuable references and support for this project. Their contributions to the open-source community are truly appreciated.
