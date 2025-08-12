@@ -7,7 +7,7 @@
 [![hf_paper](https://img.shields.io/badge/🤗-FantasyPortrait-red.svg)](https://huggingface.co/papers/2507.12956)
 
 ## 🔥 Latest News!!
-* August 10, 2025: We released the inference code, model weights and datasets.
+* August 12, 2025: We released the inference code, model weights and datasets.
 
 ## Demo
 For more interesting results, please visit our [website](https://fantasy-amap.github.io/fantasy-portrait/).

@@ -1,17 +1,20 @@
 import cv2
+import numpy as np
 import torch
 import torch.nn as nn
-import numpy as np
 import torch.nn.functional as F
 from tqdm import tqdm
 
+
 def np_bgr_to_tensor(img_np, dtype):
-    img_rgb = cv2.cvtColor(img_np, cv2.COLOR_BGR2RGB) / 255. * 2 - 1
+    img_rgb = cv2.cvtColor(img_np, cv2.COLOR_BGR2RGB) / 255.0 * 2 - 1
     return torch.tensor(img_rgb).permute(2, 0, 1).to(dtype=dtype)
+
 
 def image_preprocess(np_bgr, size, dtype=torch.float32):
     img_np = cv2.resize(np_bgr, size)
     return np_bgr_to_tensor(img_np, dtype)
+
 
 def umeyama(src, dst, estimate_scale):
     """Estimate N-D similarity transformation with or without scaling.
@@ -83,9 +86,21 @@ def umeyama(src, dst, estimate_scale):
 
     return T
 
+
 def warp_face_pd_fgc(image, landmarks222, save_size=224):
     pt5_idx = [182, 202, 36, 149, 133]
-    dst_pt5 = np.array([[0.3843, 0.27], [0.62, 0.2668], [0.503, 0.4185], [0.406, 0.5273], [0.5977, 0.525]]) * save_size
+    dst_pt5 = (
+        np.array(
+            [
+                [0.3843, 0.27],
+                [0.62, 0.2668],
+                [0.503, 0.4185],
+                [0.406, 0.5273],
+                [0.5977, 0.525],
+            ]
+        )
+        * save_size
+    )
     src_pt5 = landmarks222[pt5_idx]
 
     M = umeyama(src_pt5, dst_pt5, True)[0:2]
@@ -93,23 +108,35 @@ def warp_face_pd_fgc(image, landmarks222, save_size=224):
 
     return warped
 
-def get_drive_expression_pd_fgc(pd_fpg_motion, images, landmarks, device, dtype=torch.float32):
+
+def get_drive_expression_pd_fgc(
+    pd_fpg_motion, images, landmarks, device, dtype=torch.float32
+):
     emo_list = []
 
     motion_model = pd_fpg_motion.to(device=device)
     with tqdm(total=len(images)) as pbar:
         for frame, landmark in zip(images, landmarks):
             emo_image = warp_face_pd_fgc(frame, landmark, save_size=224)
-            input_tensor = image_preprocess(emo_image, (224, 224), dtype).to(device=device).unsqueeze(0)
+            input_tensor = (
+                image_preprocess(emo_image, (224, 224), dtype)
+                .to(device=device)
+                .unsqueeze(0)
+            )
             # headpose_emb, eye_embed, emo_embed, mouth_feat
             # emo_tensor = motion_model(input_tensor)
             # emo_list.append(emo_tensor)
             # headpose_emb [1, 6]; eye_embed [1, 6]; emo_embed [1, 30]; mouth_feat [1, 512]
             headpose_emb, eye_embed, emo_embed, mouth_feat = motion_model(input_tensor)
-            emotion = {'headpose_emb': headpose_emb.cpu(), 'eye_embed': eye_embed.cpu(), 'emo_embed': emo_embed.cpu(), 'mouth_feat': mouth_feat.cpu()}
+            emotion = {
+                "headpose_emb": headpose_emb.cpu(),
+                "eye_embed": eye_embed.cpu(),
+                "emo_embed": emo_embed.cpu(),
+                "mouth_feat": mouth_feat.cpu(),
+            }
             emo_list.append(emotion)
 
-            pbar.set_description('PD_FPG_MOTION')
+            pbar.set_description("PD_FPG_MOTION")
             pbar.update()
 
     # neg_tensor = motion_model(torch.ones_like(input_tensor)*-1).cpu()
@@ -118,6 +145,7 @@ def get_drive_expression_pd_fgc(pd_fpg_motion, images, landmarks, device, dtype=
     # pd_fpg_motion.to(device='cpu')
     # return dict(pd_fpg=ret_tensor.unsqueeze(0), neg_pd_fpg=neg_tensor.unsqueeze(0))
     return emo_list
+
 
 def det_landmarks(face_aligner, frame_list):
     rect_list = []
@@ -129,11 +157,14 @@ def det_landmarks(face_aligner, frame_list):
         for frame in frame_list:
             faces = face_aligner.forward(frame)
             if len(faces) > 0:
-                face = sorted(faces, key=lambda x: (x['face_rect'][2] - x['face_rect'][0]) * (
-                        x['face_rect'][3] - x['face_rect'][1]))[-1]
-                rect_list.append(face['face_rect'])
+                face = sorted(
+                    faces,
+                    key=lambda x: (x["face_rect"][2] - x["face_rect"][0])
+                    * (x["face_rect"][3] - x["face_rect"][1]),
+                )[-1]
+                rect_list.append(face["face_rect"])
                 new_frame_list.append(frame)
-            pbar.set_description('DET stage1')
+            pbar.set_description("DET stage1")
             pbar.update()
 
     assert len(new_frame_list) > 0
@@ -144,12 +175,15 @@ def det_landmarks(face_aligner, frame_list):
         for frame, rect in zip(new_frame_list, rect_list):
             faces = face_aligner.forward(frame, pre_rect=rect)
             if len(faces) > 0:
-                face = sorted(faces, key=lambda x: (x['face_rect'][2] - x['face_rect'][0]) * (
-                        x['face_rect'][3] - x['face_rect'][1]))[-1]
-                landmarks = face['pre_kpt_222']
+                face = sorted(
+                    faces,
+                    key=lambda x: (x["face_rect"][2] - x["face_rect"][0])
+                    * (x["face_rect"][3] - x["face_rect"][1]),
+                )[-1]
+                landmarks = face["pre_kpt_222"]
                 save_frame_list.append(frame)
                 save_landmark_list.append(landmarks)
-            pbar.set_description('DET stage2')
+            pbar.set_description("DET stage2")
             pbar.update()
 
     assert len(save_frame_list) > 0
@@ -157,10 +191,13 @@ def det_landmarks(face_aligner, frame_list):
     face_aligner.reset_track()
     return save_frame_list, save_landmark_list, rect_list
 
+
 def conv3x3(in_planes, out_planes, strd=1, padding=1, bias=False):
     "3x3 convolution with padding"
-    return nn.Conv2d(in_planes, out_planes, kernel_size=3,
-                     stride=strd, padding=padding, bias=bias)
+    return nn.Conv2d(
+        in_planes, out_planes, kernel_size=3, stride=strd, padding=padding, bias=bias
+    )
+
 
 class HourGlass(nn.Module):
     def __init__(self, num_modules, depth, num_features):
@@ -173,37 +210,37 @@ class HourGlass(nn.Module):
         self._generate_network(self.depth)
 
     def _generate_network(self, level):
-        self.add_module('b1_' + str(level), ConvBlock(256, 256))
+        self.add_module("b1_" + str(level), ConvBlock(256, 256))
 
-        self.add_module('b2_' + str(level), ConvBlock(256, 256))
+        self.add_module("b2_" + str(level), ConvBlock(256, 256))
 
         if level > 1:
             self._generate_network(level - 1)
         else:
-            self.add_module('b2_plus_' + str(level), ConvBlock(256, 256))
+            self.add_module("b2_plus_" + str(level), ConvBlock(256, 256))
 
-        self.add_module('b3_' + str(level), ConvBlock(256, 256))
+        self.add_module("b3_" + str(level), ConvBlock(256, 256))
 
     def _forward(self, level, inp):
         # Upper branch
         up1 = inp
-        up1 = self._modules['b1_' + str(level)](up1)
+        up1 = self._modules["b1_" + str(level)](up1)
         up1 = self.dropout(up1)
         # Lower branch
         low1 = F.max_pool2d(inp, 2, stride=2)
-        low1 = self._modules['b2_' + str(level)](low1)
+        low1 = self._modules["b2_" + str(level)](low1)
 
         if level > 1:
             low2 = self._forward(level - 1, low1)
         else:
             low2 = low1
-            low2 = self._modules['b2_plus_' + str(level)](low2)
+            low2 = self._modules["b2_plus_" + str(level)](low2)
 
         low3 = low2
-        low3 = self._modules['b3_' + str(level)](low3)
+        low3 = self._modules["b3_" + str(level)](low3)
         up1size = up1.size()
         rescale_size = (up1size[2], up1size[3])
-        up2 = F.upsample(low3, size=rescale_size, mode='bilinear')
+        up2 = F.upsample(low3, size=rescale_size, mode="bilinear")
 
         return up1 + up2
 
@@ -225,8 +262,7 @@ class ConvBlock(nn.Module):
             self.downsample = nn.Sequential(
                 nn.BatchNorm2d(in_planes),
                 nn.ReLU(True),
-                nn.Conv2d(in_planes, out_planes,
-                          kernel_size=1, stride=1, bias=False),
+                nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=1, bias=False),
             )
         else:
             self.downsample = None
@@ -255,6 +291,7 @@ class ConvBlock(nn.Module):
 
         return out3
 
+
 class FAN_use(nn.Module):
     def __init__(self):
         super(FAN_use, self).__init__()
@@ -269,19 +306,26 @@ class FAN_use(nn.Module):
 
         # Stacking part
         hg_module = 0
-        self.add_module('m' + str(hg_module), HourGlass(1, 4, 256))
-        self.add_module('top_m_' + str(hg_module), ConvBlock(256, 256))
-        self.add_module('conv_last' + str(hg_module),
-                        nn.Conv2d(256, 256, kernel_size=1, stride=1, padding=0))
-        self.add_module('l' + str(hg_module), nn.Conv2d(256,
-                                                        68, kernel_size=1, stride=1, padding=0))
-        self.add_module('bn_end' + str(hg_module), nn.BatchNorm2d(256))
+        self.add_module("m" + str(hg_module), HourGlass(1, 4, 256))
+        self.add_module("top_m_" + str(hg_module), ConvBlock(256, 256))
+        self.add_module(
+            "conv_last" + str(hg_module),
+            nn.Conv2d(256, 256, kernel_size=1, stride=1, padding=0),
+        )
+        self.add_module(
+            "l" + str(hg_module), nn.Conv2d(256, 68, kernel_size=1, stride=1, padding=0)
+        )
+        self.add_module("bn_end" + str(hg_module), nn.BatchNorm2d(256))
 
         if hg_module < self.num_modules - 1:
             self.add_module(
-                'bl' + str(hg_module), nn.Conv2d(256, 256, kernel_size=1, stride=1, padding=0))
-            self.add_module('al' + str(hg_module), nn.Conv2d(68,
-                                                             256, kernel_size=1, stride=1, padding=0))
+                "bl" + str(hg_module),
+                nn.Conv2d(256, 256, kernel_size=1, stride=1, padding=0),
+            )
+            self.add_module(
+                "al" + str(hg_module),
+                nn.Conv2d(68, 256, kernel_size=1, stride=1, padding=0),
+            )
 
         self.avgpool = nn.MaxPool2d((2, 2), 2)
         self.conv6 = nn.Conv2d(68, 1, 3, 2, 1)
@@ -298,13 +342,13 @@ class FAN_use(nn.Module):
         previous = x
 
         i = 0
-        hg = self._modules['m' + str(i)](previous)
+        hg = self._modules["m" + str(i)](previous)
 
         ll = hg
-        ll = self._modules['top_m_' + str(i)](ll)
+        ll = self._modules["top_m_" + str(i)](ll)
 
-        ll = self._modules['bn_end' + str(i)](self._modules['conv_last' + str(i)](ll))
-        tmp_out = self._modules['l' + str(i)](F.relu(ll))
+        ll = self._modules["bn_end" + str(i)](self._modules["conv_last" + str(i)](ll))
+        tmp_out = self._modules["l" + str(i)](F.relu(ll))
 
         net = self.relu(self.bn5(tmp_out))
         net = self.conv6(net)
@@ -319,16 +363,26 @@ class FanEncoder(nn.Module):
         super(FanEncoder, self).__init__()
         self.model = FAN_use()
 
-        self.to_mouth = nn.Sequential(nn.Linear(512, 512), nn.ReLU(), nn.BatchNorm1d(512), nn.Linear(512, 512))
-        self.mouth_embed = nn.Sequential(nn.ReLU(), nn.Linear(512, 512-pose_dim-eye_dim))
-        
-        self.to_headpose = nn.Sequential(nn.Linear(512, 512), nn.ReLU(), nn.BatchNorm1d(512), nn.Linear(512, 512))
+        self.to_mouth = nn.Sequential(
+            nn.Linear(512, 512), nn.ReLU(), nn.BatchNorm1d(512), nn.Linear(512, 512)
+        )
+        self.mouth_embed = nn.Sequential(
+            nn.ReLU(), nn.Linear(512, 512 - pose_dim - eye_dim)
+        )
+
+        self.to_headpose = nn.Sequential(
+            nn.Linear(512, 512), nn.ReLU(), nn.BatchNorm1d(512), nn.Linear(512, 512)
+        )
         self.headpose_embed = nn.Sequential(nn.ReLU(), nn.Linear(512, pose_dim))
 
-        self.to_eye = nn.Sequential(nn.Linear(512, 512), nn.ReLU(), nn.BatchNorm1d(512), nn.Linear(512, 512))
+        self.to_eye = nn.Sequential(
+            nn.Linear(512, 512), nn.ReLU(), nn.BatchNorm1d(512), nn.Linear(512, 512)
+        )
         self.eye_embed = nn.Sequential(nn.ReLU(), nn.Linear(512, eye_dim))
 
-        self.to_emo = nn.Sequential(nn.Linear(512, 512), nn.ReLU(), nn.BatchNorm1d(512), nn.Linear(512, 512))
+        self.to_emo = nn.Sequential(
+            nn.Linear(512, 512), nn.ReLU(), nn.BatchNorm1d(512), nn.Linear(512, 512)
+        )
         self.emo_embed = nn.Sequential(nn.ReLU(), nn.Linear(512, 30))
 
     def forward_feature(self, x):
@@ -344,5 +398,5 @@ class FanEncoder(nn.Module):
         eye_embed = self.eye_embed(eye_feat)
         emo_feat = self.to_emo(x)
         emo_embed = self.emo_embed(emo_feat)
-        
+
         return headpose_emb, eye_embed, emo_embed, mouth_feat

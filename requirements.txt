@@ -12,7 +12,7 @@ protobuf
 modelscope
 ftfy
 librosa
-peft 
-lightning 
+peft
+lightning
 pandas
 diffusers

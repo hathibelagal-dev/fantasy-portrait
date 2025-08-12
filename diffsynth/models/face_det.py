@@ -1,8 +1,10 @@
+import os.path as osp
 from abc import ABCMeta, abstractmethod
+
 import cv2
 import numpy as np
 from scipy.special import softmax
-import os.path as osp
+
 from .face_utils import create_onnx_session
 
 _COLORS = (
@@ -13,9 +15,10 @@ _COLORS = (
             0.741,
         ]
     )
-        .astype(np.float32)
-        .reshape(-1, 3)
+    .astype(np.float32)
+    .reshape(-1, 3)
 )
+
 
 def get_resize_matrix(raw_shape, dst_shape, keep_ratio):
     """
@@ -49,6 +52,7 @@ def get_resize_matrix(raw_shape, dst_shape, keep_ratio):
         Rs[1, 1] *= d_h / r_h
         return Rs
 
+
 def warp_boxes(boxes, M, width, height):
     """Apply transform to boxes
     Copy from nanodet/data/transform/warp.py
@@ -72,6 +76,7 @@ def warp_boxes(boxes, M, width, height):
         return xy.astype(np.float32)
     else:
         return boxes
+
 
 def overlay_bbox_cv(img, all_box, class_names):
     """Draw result boxes
@@ -98,6 +103,7 @@ def overlay_bbox_cv(img, all_box, class_names):
         )
         cv2.putText(img, text, (x0, y0 - 1), font, 0.5, txt_color, thickness=1)
     return img
+
 
 def hard_nms(box_scores, iou_threshold, top_k=-1, candidate_size=200):
     """
@@ -171,15 +177,15 @@ def area_of(left_top, right_bottom):
 
 class NanoDetABC(metaclass=ABCMeta):
     def __init__(
-            self,
-            input_shape=[272, 160],
-            reg_max=7,
-            strides=[8, 16, 32],
-            prob_threshold=0.4,
-            iou_threshold=0.3,
-            num_candidate=1000,
-            top_k=-1,
-            class_names=["face"]
+        self,
+        input_shape=[272, 160],
+        reg_max=7,
+        strides=[8, 16, 32],
+        prob_threshold=0.4,
+        iou_threshold=0.3,
+        num_candidate=1000,
+        top_k=-1,
+        class_names=["face"],
     ):
         self.strides = strides
         self.input_shape = input_shape
@@ -297,10 +303,11 @@ class NanoDetABC(metaclass=ABCMeta):
 
         return bbox, label, score
 
+
 class FaceDet(NanoDetABC):
     def __init__(self, model_path="", gpu_id=None, *args, **kwargs):
         super(FaceDet, self).__init__(*args, **kwargs)
-        
+
         self.model_path = model_path
         self.ort_session = create_onnx_session(model_path, gpu_id=gpu_id)
         self.input_name = self.ort_session.get_inputs()[0].name

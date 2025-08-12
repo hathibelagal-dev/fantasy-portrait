@@ -1,21 +1,43 @@
-import cv2,os
-from tqdm import tqdm
-import numpy as np
-from diffsynth import save_video
-from PIL import Image,ImageDraw
+import os
 import subprocess
 
-def merge_audio_to_video(driven_video_path, save_video_path, save_video_path_with_audio):
-    audio_path = "temp_audio.aac"
-    subprocess.run([
-        "ffmpeg", "-i", driven_video_path, "-vn", "-acodec", "aac", "-y", audio_path
-    ])
+import cv2
+import numpy as np
+from PIL import Image, ImageDraw
+from tqdm import tqdm
 
-    subprocess.run([
-        "ffmpeg", "-i", save_video_path, "-i", audio_path, "-c:v", "copy", "-c:a", "aac", "-strict", "experimental", "-y", save_video_path_with_audio
-    ])
+from diffsynth import save_video
+
+
+def merge_audio_to_video(
+    driven_video_path, save_video_path, save_video_path_with_audio
+):
+    audio_path = "temp_audio.aac"
+    subprocess.run(
+        ["ffmpeg", "-i", driven_video_path, "-vn", "-acodec", "aac", "-y", audio_path]
+    )
+
+    subprocess.run(
+        [
+            "ffmpeg",
+            "-i",
+            save_video_path,
+            "-i",
+            audio_path,
+            "-c:v",
+            "copy",
+            "-c:a",
+            "aac",
+            "-strict",
+            "experimental",
+            "-y",
+            save_video_path_with_audio,
+        ]
+    )
 
     subprocess.run(["rm", audio_path])
+
+
 def resize_image_by_longest_edge(image_path, target_size):
     image = Image.open(image_path).convert("RGB")
     width, height = image.size
@@ -23,16 +45,17 @@ def resize_image_by_longest_edge(image_path, target_size):
     new_size = (int(width * scale), int(height * scale))
     return image.resize(new_size, Image.LANCZOS)
 
+
 def extract_faces_from_video(video_path, output_dir, face_aligner):
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
         print("ERROR opening video file")
         return
-    
+
     fps = int(cap.get(cv2.CAP_PROP_FPS))
     frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    
+
     face_videos = {}
     padding = 100
     bounding_boxes_first = None
@@ -43,12 +66,18 @@ def extract_faces_from_video(video_path, output_dir, face_aligner):
         ret, frame = cap.read()
         if not ret:
             break
-        
+
         rgb_frame = frame[:, :, ::-1]
-        
+
         if bounding_boxes_first is None:
-            bounding_boxes, _, score = face_aligner.face_alignment_module.face_detector.detect(rgb_frame)
-            bounding_boxes = sorted(bounding_boxes,key=lambda box: (box[0] + box[2]) / 2)
+            (
+                bounding_boxes,
+                _,
+                score,
+            ) = face_aligner.face_alignment_module.face_detector.detect(rgb_frame)
+            bounding_boxes = sorted(
+                bounding_boxes, key=lambda box: (box[0] + box[2]) / 2
+            )
             if len(bounding_boxes) == 2:
                 bounding_boxes_first = bounding_boxes
 
@@ -62,22 +91,28 @@ def extract_faces_from_video(video_path, output_dir, face_aligner):
 
                 face = frame[top:bottom, left:right][:, :, ::-1]
                 print(face.shape)
-                
+
                 if i not in face_videos:
                     face_videos[i] = {"frames": []}
-                
+
                 face_videos[i]["frames"].append(face)
-        
+
     cap.release()
-    
+
     for person_id, data in face_videos.items():
-        if len(data["frames"]) > 0:  
-            os.makedirs(output_dir,exist_ok=True)
-            save_video(data["frames"],os.path.join(output_dir, f"{person_id}.mp4"), fps=fps, quality=5)
+        if len(data["frames"]) > 0:
+            os.makedirs(output_dir, exist_ok=True)
+            save_video(
+                data["frames"],
+                os.path.join(output_dir, f"{person_id}.mp4"),
+                fps=fps,
+                quality=5,
+            )
         else:
             print(f"person_{person_id} video is null.")
 
     print(f"success generate {len(face_videos)} single video.")
+
 
 def change_video_fps(input_path, output_path, target_fps=25):
     if not os.path.isfile(input_path):
@@ -85,14 +120,20 @@ def change_video_fps(input_path, output_path, target_fps=25):
 
     command = [
         "ffmpeg",
-        "-y",                       
-        "-i", input_path,           
-        "-r", str(target_fps),      
-        "-c:v", "libx264",          
-        "-preset", "medium",        
-        "-crf", "23",              
-        "-c:a", "copy",                       
-        output_path                 
+        "-y",
+        "-i",
+        input_path,
+        "-r",
+        str(target_fps),
+        "-c:v",
+        "libx264",
+        "-preset",
+        "medium",
+        "-crf",
+        "23",
+        "-c:a",
+        "copy",
+        output_path,
     ]
     try:
         result = subprocess.run(command, check=True, capture_output=True, text=True)
@@ -100,6 +141,7 @@ def change_video_fps(input_path, output_path, target_fps=25):
     except subprocess.CalledProcessError as e:
         print(f"Error message: {e.stderr}")
         raise
+
 
 def draw_rects_on_frames(frame_list, rect_lists, color="red", width=3):
     """
@@ -127,4 +169,3 @@ def draw_rects_on_frames(frame_list, rect_lists, color="red", width=3):
         drawn_frames.append(draw_image)
 
     return drawn_frames
-
