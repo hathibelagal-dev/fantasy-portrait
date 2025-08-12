@@ -282,7 +282,6 @@ class PortraitAdapter(nn.Module):
     def set_portrait_adapter(self, wan_dit):
         attn_procs = {}
         for name in wan_dit.attn_processors.keys():
-            # print(name)
             attn_procs[name] = SingleStreamBlockProcessor(
                 context_dim=self.adapter_proj_dim, hidden_dim=wan_dit.dim
             )
@@ -315,7 +314,7 @@ class PortraitAdapter(nn.Module):
         split_sizes = [6, 6, 30, 512]
         headpose, eye, emo, mouth = torch.split(
             adapter_fea, split_sizes, dim=-1
-        )  # B frames c
+        )
         B, frames, dim = mouth.shape
         mouth = mouth.view(B * frames, 1, 512)
         emo = emo.view(B * frames, 1, 30)
