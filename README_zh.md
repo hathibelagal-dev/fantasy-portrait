@@ -10,6 +10,7 @@
 [![ms_dataset](https://img.shields.io/badge/ModelScope-Dataset-ff69b4.svg)](https://www.modelscope.cn/datasets/amap_cvlab/FantasyPortrait-Multi-Expr)
 
 ## 🔥 最新动态！！
+* 2025年8月14日：我们的工作被加入到[ComfyUI-Wan](https://github.com/kijai/ComfyUI-WanVideoWrapper/tree/main/fantasyportrait) ! 感谢 [kijai](https://github.com/kijai) 更新 👏!
 * 2025年8月12日：我们已发布推理代码、模型权重和数据集。
 
 ## 演示
