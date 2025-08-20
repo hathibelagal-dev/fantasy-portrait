@@ -108,3 +108,7 @@ bash infer_multi_diff.sh
 
 ## 致谢
 感谢 [Wan2.1](https://github.com/Wan-Video/Wan2.1)、[PD-FGC](https://github.com/Dorniwang/PD-FGC-inference) 和 [DiffSynth-Studio](https://github.com/modelscope/DiffSynth-Studio) 开源他们的模型和代码，为本项目提供了宝贵的参考和支持。我们非常感谢他们对开源社区的贡献。
+
+## Star 历史
+
+[![Star History Chart](https://api.star-history.com/svg?repos=Fantasy-AMAP/fantasy-portrait&type=Date)](https://www.star-history.com/#Fantasy-AMAP/fantasy-portrait&Date)
