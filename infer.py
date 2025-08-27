@@ -261,10 +261,10 @@ def load_wan_video():
         torch_dtype=torch.float8_e4m3fn,
     )
     pipe = WanVideoPipeline.from_model_manager(
-        model_manager, torch_dtype=torch.float8_e4m3fn, device="cuda"
+        model_manager, torch_dtype=torch.bfloat16, device="cuda"
     )
     pipe.enable_vram_management(
-        num_persistent_param_in_dit=0
+        num_persistent_param_in_dit=10**9
     )
     return pipe
 
