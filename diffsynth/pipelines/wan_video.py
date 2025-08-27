@@ -423,7 +423,7 @@ class WanVideoPipeline(BasePipeline):
                 onload_dtype=dtype,
                 onload_device="cpu",
                 computation_dtype=self.torch_dtype,
-                computation_device=self.device,
+                computation_device="cpu",
             ),
         )
         dtype = next(iter(self.dit.parameters())).dtype
