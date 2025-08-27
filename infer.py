@@ -264,7 +264,7 @@ def load_wan_video():
         model_manager, torch_dtype=torch.bfloat16, device="cuda"
     )
     pipe.enable_vram_management(
-        num_persistent_param_in_dit=10**9
+        num_persistent_param_in_dit=0
     )
     return pipe
 
