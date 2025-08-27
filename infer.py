@@ -258,15 +258,14 @@ def load_wan_video():
             os.path.join(args.wan_model_path, "models_t5_umt5-xxl-enc-bf16.pth"),
             os.path.join(args.wan_model_path, "Wan2.1_VAE.pth"),
         ],
-        # torch_dtype=torch.float8_e4m3fn, # You can set `torch_dtype=torch.bfloat16` to disable FP8 quantization.
-        torch_dtype=torch.bfloat16,  # You can set `torch_dtype=torch.bfloat16` to disable FP8 quantization.
+        torch_dtype=torch.float8_e4m3fn,
     )
     pipe = WanVideoPipeline.from_model_manager(
-        model_manager, torch_dtype=torch.bfloat16, device="cuda"
+        model_manager, torch_dtype=torch.float8_e4m3fn, device="cuda"
     )
     pipe.enable_vram_management(
-        num_persistent_param_in_dit=None
-    )  # You can set `num_persistent_param_in_dit` to a small number to reduce VRAM required.
+        num_persistent_param_in_dit=10**9
+    )
     return pipe
 
 
