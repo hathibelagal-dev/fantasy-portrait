@@ -554,7 +554,7 @@ class WanVideoPipeline(BasePipeline):
                 ],
                 device=self.device,
             )[0]
-            y = torch.concat([msk, y])
+            y = torch.concat([msk.to("cuda"), y.to("cuda")])
         return {"clip_fea": clip_context, "y": [y]}
 
     def tensor2video(self, frames):
