@@ -102,7 +102,7 @@ class WanPrompter(BasePrompter):
     def fetch_models(self, text_encoder: WanTextEncoder = None):
         self.text_encoder = text_encoder
 
-    def encode_prompt(self, prompt, positive=True, device="cuda"):
+    def encode_prompt(self, prompt, positive=True, device="cpu"):
         prompt = self.process_prompt(prompt, positive=positive)
 
         ids, mask = self.tokenizer(prompt, return_mask=True, add_special_tokens=True)
