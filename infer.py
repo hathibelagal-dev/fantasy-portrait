@@ -218,7 +218,7 @@ args = parse_args()
 
 def load_wan_video():
     # Load models
-    model_manager = ModelManager(device="cpu")
+    model_manager = ModelManager(device="cuda")
     model_manager.load_models(
         [
             [
